@@ -2,12 +2,14 @@ import String from "./String.mjs";
 import Set from "./Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
+import Entry from "./Entry.mjs";
 class Ledis {
-
   constructor() {
     this.commands = new Map();
     this.data = new Map();
     this.clone = { data: null, timpestamp: null };
+    this.save = this.save.bind(this);
+    this.restore = this.restore.bind(this);
   }
 
   registerCommand(command, func) {
@@ -79,20 +81,31 @@ class Ledis {
       return Response.error("Invalid number of arguments");
     }
     // Deep clone the data map
-    console.log("save: ", Ledis.data);
+
+    console.log("save: ", this.data);
     this.clone.data = new Map();
     this.clone.timpestamp = Date.now();
-    for (const [key, entry] of Ledis.data.entries()) {
+    for (const [key, entry] of this.data.entries()) {
       const clonedEntry = JSON.parse(JSON.stringify(entry));
       this.clone.data.set(key, clonedEntry);
     }
     console.log("clone: ", this.clone);
     return this.clone.timpestamp;
   }
-  restore() {
+  restore(check) {
+    if (check !== undefined) {
+      return Response.error("Invalid number of arguments");
+    }
+    if (this.clone.data === null) {
+      return Response.error("No data to restore");
+    }
+
     this.data.clear();
 
     for (const [key, entry] of this.clone.data.entries()) {
+      console.log("restore: ", key, entry);
+      const clonedEntry = new Entry(entry.value, entry.expireAt, entry.type);
+      this.data.set(key, clonedEntry);
     }
   }
 }
