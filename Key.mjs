@@ -28,7 +28,7 @@ class Key {
   static ttl(key) {
     const entry = Ledis.getEntry(key);
     if (entry === undefined) {
-      return Response.integer(0);
+      return Response.integer(-2);
     }
     const ttl = entry.getTTL();
 

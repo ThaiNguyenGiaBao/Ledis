@@ -21,7 +21,6 @@ class String {
       return Response.string(entry.value);
     }
 
-    Ledis.removeEntry(key);
     return Response.nil();
   }
 }

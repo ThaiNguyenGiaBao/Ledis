@@ -32,7 +32,7 @@ class Ledis {
     return Response.error(`command not found for '${command}'`);
   }
   static setEntry(key, entry) {
-    //console.log("setEntry: ", key, entry);
+    console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
     if (existingEntry && existingEntry.isExpired()) {
       this.removeEntry(key);
@@ -43,11 +43,12 @@ class Ledis {
       throw new Error(`Error: Type mismatch for key '${key}'`);
     }
 
-    return this.data.get(key);
+    this.data.set(key, entry);
   }
 
   static getEntry(key) {
     const entry = this.data.get(key);
+    console.log("getEntry: ", key, entry);
     if (entry && entry.isExpired()) {
       this.removeEntry(key);
       return undefined;
