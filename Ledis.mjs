@@ -17,7 +17,9 @@ class Ledis {
   }
 
   execute(cmd) {
-    const parseCmd = cmd.split(" ");
+    const parseCmd = cmd
+      .match(/"([^"]*)"|(\S+)/g)
+      .map((s) => s.replace(/^"(.+)"$/, "$1"));
     const command = parseCmd[0];
     if (this.commands.has(command)) {
       const func = this.commands.get(command);
