@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Ledis CLI – Ubuntu Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #300a24;
+            color: #eeeeec;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal {
+            padding: 10px;
+            overflow-y: auto;
+            height: 100%;
+            white-space: pre-wrap;
+            box-sizing: border-box;
+        }
+
+        .line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            flex-shrink: 0;
+        }
+
+
+
+        .command {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: inherit;
+            font: inherit;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal"></div>
+
+    <script type="module">
+        import Ledis from './Ledis.mjs'
+        const ledis = new Ledis()
+
+        const term = document.getElementById('terminal');
+        function addPromptLine() {
+            const line = document.createElement('div');
+            line.className = 'line';
+
+            const prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.innerHTML = 'ledis> '
+
+
+
+            const input = document.createElement('input');
+            input.className = 'command';
+            input.autocomplete = 'off';
+            input.addEventListener('keydown', onCommand);
+
+            line.append(prompt, input);
+            term.appendChild(line);
+            input.focus();
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function onCommand(e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+
+            const input = e.target;
+            const cmd = input.value.trim().toLowerCase();
+            input.disabled = true;
+            input.removeEventListener('keydown', onCommand);
+
+            if (cmd === 'clear') {
+                term.innerHTML = '';
+            }
+            else if (cmd != '') {
+                const result = ledis.execute(cmd);
+                const lines = Array.isArray(result) ? result : [result];
+                for (const text of lines) {
+                    const out = document.createElement('div');
+                    out.textContent = text;
+                    term.appendChild(out);
+                }
+            }
+
+
+            // else: by disabling the input, the typed command stays visible
+
+            addPromptLine();
+        }
+
+        // kick things off
+        addPromptLine();
+    </script>
+</body>
+
+</html>
