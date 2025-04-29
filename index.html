@@ -53,8 +53,7 @@
     <div id="terminal"></div>
 
     <script type="module">
-        import Ledis from './Ledis.mjs'
-        const ledis = new Ledis()
+        import { ledis } from './Ledis.mjs'
 
         const term = document.getElementById('terminal');
         function addPromptLine() {

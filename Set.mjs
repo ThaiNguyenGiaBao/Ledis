@@ -1,5 +1,5 @@
 import Entry from "./Entry.mjs";
-import Ledis from "./Ledis.mjs";
+import { ledis } from "./Ledis.mjs";
 
 import Response from "./Response.mjs";
 
@@ -9,7 +9,7 @@ class Set {
     if (key === undefined || valueList.length === 0) {
       return Response.error("Key and value are required");
     }
-    if (Ledis.getEntry(key) === undefined) {
+    if (ledis.getEntry(key) === undefined) {
       // remove all duplicates from the set
       let list = [];
       for (const value of valueList) {
@@ -20,13 +20,13 @@ class Set {
 
       const entry = new Entry(list, null, "set");
       try {
-        Ledis.setEntry(key, entry);
+        ledis.setEntry(key, entry);
       } catch (error) {
         return Response.error(error.message);
       }
       return Response.integer(list.length);
     } else {
-      const existingEntry = Ledis.getEntry(key);
+      const existingEntry = ledis.getEntry(key);
       if (existingEntry.type !== "set") {
         return Response.error(`Error: Type mismatch for key '${key}'`);
       }
@@ -37,7 +37,7 @@ class Set {
           count++;
         }
       }
-      Ledis.setEntry(key, existingEntry);
+      ledis.setEntry(key, existingEntry);
 
       return Response.integer(count);
     }
@@ -50,7 +50,7 @@ class Set {
     if (key === undefined) {
       return Response.error("Key is required");
     }
-    const entry = Ledis.getEntry(key);
+    const entry = ledis.getEntry(key);
     if (entry === undefined) {
       return Response.emptyArray();
     }
@@ -62,7 +62,7 @@ class Set {
     if (key === undefined || valueList.length === 0) {
       return Response.error("Key and value are required");
     }
-    const existingEntry = Ledis.getEntry(key);
+    const existingEntry = ledis.getEntry(key);
     if (existingEntry === undefined) {
       return Response.emptyArray();
     }
@@ -76,7 +76,7 @@ class Set {
       }
     }
     if (existingEntry.value.length === 0) {
-      Ledis.removeEntry(key);
+      ledis.removeEntry(key);
     }
     return Response.integer(count);
   }
@@ -89,7 +89,7 @@ class Set {
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
     const valueList = listKey.map((key, index) => {
-      const entry = Ledis.getEntry(key);
+      const entry = ledis.getEntry(key);
       if (entry === undefined) {
         return Response.emptyArray();
       }

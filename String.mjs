@@ -1,5 +1,5 @@
 import Entry from "./Entry.mjs";
-import Ledis from "./Ledis.mjs";
+import { ledis } from "./Ledis.mjs";
 import Response from "./Response.mjs";
 
 class String {
@@ -14,7 +14,7 @@ class String {
     const entry = new Entry(value, null, "string");
     console.log("entry: ", entry);
     try {
-      Ledis.setEntry(key, entry);
+      ledis.setEntry(key, entry);
     } catch (error) {
       return Response.error(error.message);
     }
@@ -28,7 +28,7 @@ class String {
       return Response.error("Invalid number of arguments");
     }
     //console.log("get key: ", key);
-    const entry = Ledis.getEntry(key);
+    const entry = ledis.getEntry(key);
     console.log("entry: ", entry);
     if (entry) {
       return Response.string(entry.value);

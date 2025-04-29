@@ -3,19 +3,15 @@ import Set from "./Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 class Ledis {
-  static data = new Map();
+
   constructor() {
     this.commands = new Map();
-    this.commands.set("set", String.set);
-    this.commands.set("get", String.get);
-    this.commands.set("sadd", Set.sadd);
-    this.commands.set("srem", Set.srem);
-    this.commands.set("smembers", Set.smembers);
-    this.commands.set("sinter", Set.sinter);
-    this.commands.set("keys", Key.keys);
-    this.commands.set("del", Key.del);
-    this.commands.set("expire", Key.expire);
-    this.commands.set("ttl", Key.ttl);
+    this.data = new Map();
+    this.clone = { data: null, timpestamp: null };
+  }
+
+  registerCommand(command, func) {
+    this.commands.set(command, func);
   }
 
   execute(cmd) {
@@ -24,14 +20,19 @@ class Ledis {
     if (this.commands.has(command)) {
       const func = this.commands.get(command);
       console.log(func);
-      console.log("parseCmd: ", ...parseCmd.slice(1));
-      const result = func(...parseCmd.slice(1));
+      console.log("parseCmd: ", parseCmd);
+      let result = null;
+      if (parseCmd.length === 1) {
+        result = func();
+      } else {
+        result = func(...parseCmd.slice(1));
+      }
       console.log(result);
       return result;
     }
     return Response.error(`command not found for '${command}'`);
   }
-  static setEntry(key, entry) {
+  setEntry(key, entry) {
     console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
     if (existingEntry && existingEntry.isExpired()) {
@@ -48,7 +49,7 @@ class Ledis {
     this.data.set(key, entry);
   }
 
-  static getEntry(key) {
+  getEntry(key) {
     const entry = this.data.get(key);
     console.log("getEntry: ", key, entry);
     if (entry && entry.isExpired()) {
@@ -58,10 +59,10 @@ class Ledis {
     return entry;
   }
 
-  static removeEntry(key) {
+  removeEntry(key) {
     this.data.delete(key);
   }
-  static getAllKeys() {
+  getAllKeys() {
     const response = [];
     for (const [key, entry] of this.data.entries()) {
       if (!entry.isExpired()) {
@@ -72,6 +73,42 @@ class Ledis {
     }
     return response;
   }
+
+  save(check) {
+    if (check !== undefined) {
+      return Response.error("Invalid number of arguments");
+    }
+    // Deep clone the data map
+    console.log("save: ", Ledis.data);
+    this.clone.data = new Map();
+    this.clone.timpestamp = Date.now();
+    for (const [key, entry] of Ledis.data.entries()) {
+      const clonedEntry = JSON.parse(JSON.stringify(entry));
+      this.clone.data.set(key, clonedEntry);
+    }
+    console.log("clone: ", this.clone);
+    return this.clone.timpestamp;
+  }
+  restore() {
+    this.data.clear();
+
+    for (const [key, entry] of this.clone.data.entries()) {
+    }
+  }
 }
 
+const ledis = new Ledis();
+ledis.registerCommand("set", String.set);
+ledis.registerCommand("get", String.get);
+ledis.registerCommand("sadd", Set.sadd);
+ledis.registerCommand("srem", Set.srem);
+ledis.registerCommand("smembers", Set.smembers);
+ledis.registerCommand("sinter", Set.sinter);
+ledis.registerCommand("keys", Key.keys);
+ledis.registerCommand("del", Key.del);
+ledis.registerCommand("expire", Key.expire);
+ledis.registerCommand("ttl", Key.ttl);
+ledis.registerCommand("save", ledis.save);
+ledis.registerCommand("restore", ledis.restore);
 export default Ledis;
+export { ledis };

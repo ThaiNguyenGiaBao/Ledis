@@ -1,8 +1,8 @@
-import Ledis from "./Ledis.mjs";
+import { ledis } from "./Ledis.mjs";
 import Response from "./Response.mjs";
 class Key {
   static keys() {
-    const keys = Ledis.getAllKeys();
+    const keys = ledis.getAllKeys();
     if (keys.length === 0) {
       return Response.emptyArray();
     }
@@ -16,10 +16,10 @@ class Key {
     if (key === undefined) {
       return Response.error("Key is required");
     }
-    if (Ledis.getEntry(key) === undefined) {
+    if (ledis.getEntry(key) === undefined) {
       return Response.integer(0);
     }
-    Ledis.removeEntry(key);
+    ledis.removeEntry(key);
     return Response.integer(1);
   }
   static expire(key, seconds, check) {
@@ -33,10 +33,10 @@ class Key {
     if (isNaN(seconds)) {
       return Response.error("Seconds must be a number");
     }
-    if (Ledis.getEntry(key) === undefined) {
+    if (ledis.getEntry(key) === undefined) {
       return Response.integer(0);
     }
-    const entry = Ledis.getEntry(key);
+    const entry = ledis.getEntry(key);
     entry.setExpireAt(Date.now() + seconds * 1000);
     return Response.integer(seconds);
   }
@@ -48,7 +48,7 @@ class Key {
     if (check !== undefined) {
       return Response.error("Invalid number of arguments");
     }
-    const entry = Ledis.getEntry(key);
+    const entry = ledis.getEntry(key);
     if (entry === undefined) {
       return Response.integer(-2);
     }
