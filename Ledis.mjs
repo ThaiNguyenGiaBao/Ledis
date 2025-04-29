@@ -107,6 +107,7 @@ class Ledis {
       const clonedEntry = new Entry(entry.value, entry.expireAt, entry.type);
       this.data.set(key, clonedEntry);
     }
+    return this.clone.timpestamp;
   }
 }
 
