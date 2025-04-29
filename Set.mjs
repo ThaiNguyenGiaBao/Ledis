@@ -6,6 +6,9 @@ import Response from "./Response.mjs";
 class Set {
   static sadd(key, ...valueList) {
     console.log("sadd key: ", key, " valueList: ", valueList);
+    if (key === undefined || valueList.length === 0) {
+      return Response.error("Key and value are required");
+    }
     if (Ledis.getEntry(key) === undefined) {
       // remove all duplicates from the set
       let list = [];
@@ -24,6 +27,9 @@ class Set {
       return Response.integer(list.length);
     } else {
       const existingEntry = Ledis.getEntry(key);
+      if (existingEntry.type !== "set") {
+        return Response.error(`Error: Type mismatch for key '${key}'`);
+      }
       let count = 0;
       for (const value of valueList) {
         if (!existingEntry.value.includes(value)) {
@@ -31,11 +37,19 @@ class Set {
           count++;
         }
       }
+      Ledis.setEntry(key, existingEntry);
+
       return Response.integer(count);
     }
   }
 
-  static smembers(key) {
+  static smembers(key, check) {
+    if (check !== undefined) {
+      return Response.error("Invalid number of arguments");
+    }
+    if (key === undefined) {
+      return Response.error("Key is required");
+    }
     const entry = Ledis.getEntry(key);
     if (entry === undefined) {
       return Response.emptyArray();
@@ -45,6 +59,9 @@ class Set {
 
   static srem(key, ...valueList) {
     console.log("srem key: ", key, " valueList: ", valueList);
+    if (key === undefined || valueList.length === 0) {
+      return Response.error("Key and value are required");
+    }
     const existingEntry = Ledis.getEntry(key);
     if (existingEntry === undefined) {
       return Response.emptyArray();
@@ -65,6 +82,9 @@ class Set {
   }
 
   static sinter(...listKey) {
+    if (listKey.length === 0) {
+      return Response.error("Key is required");
+    }
     console.log("sinter listKey: ", listKey);
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
