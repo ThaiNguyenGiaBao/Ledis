@@ -55,7 +55,12 @@
     <script type="module">
         import { ledis } from './src/Ledis.mjs'
 
+
         const term = document.getElementById('terminal');
+        term.addEventListener('click', () => {
+            const inputs = term.querySelectorAll('input.command:not([disabled])');
+            if (inputs.length) inputs[inputs.length - 1].focus();
+        });
         function addPromptLine() {
             const line = document.createElement('div');
             line.className = 'line';

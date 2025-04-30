@@ -15,12 +15,12 @@ describe("SNAPSHOT", () => {
 
   it("should save and restore simple key/value state", () => {
     // initial state
-    expect(ledis.execute("SET a first")).toBe(Response.string("OK"));
+    expect(ledis.execute("SET a first")).toBe(Response.ok());
     // snapshot it
     ledis.execute("SAVE");
 
     // mutate after snapshot
-    expect(ledis.execute("SET a second")).toBe(Response.string("OK"));
+    expect(ledis.execute("SET a second")).toBe(Response.ok());
     expect(ledis.execute("GET a")).toBe(Response.string("second"));
 
     // restore to snapshot

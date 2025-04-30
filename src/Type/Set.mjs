@@ -5,12 +5,12 @@ import Response from "../Response.mjs";
 
 class Set {
   static sadd(key, ...valueList) {
-    console.log("sadd key: ", key, " valueList: ", valueList);
+    //console.log("sadd key: ", key, " valueList: ", valueList);
 
     const entry = ledis.getEntry(key, "set");
 
     if (entry === undefined) {
-      // remove all duplicates from the set
+      // remove all duplicates from the set 
       let list = [];
       for (const value of valueList) {
         if (!list.includes(value)) {
@@ -49,7 +49,7 @@ class Set {
   }
 
   static srem(key, ...valueList) {
-    console.log("srem key: ", key, " valueList: ", valueList);
+    //console.log("srem key: ", key, " valueList: ", valueList);
 
     const existingEntry = ledis.getEntry(key, "set");
     if (existingEntry === undefined) {
@@ -71,7 +71,7 @@ class Set {
   }
 
   static sinter(...listKey) {
-    console.log("sinter listKey: ", listKey);
+    //console.log("sinter listKey: ", listKey);
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
 
@@ -88,7 +88,7 @@ class Set {
       valueList.push(entry.value);
     }
 
-    console.log(valueList);
+    //console.log(valueList);
     const minSet = valueList[minIdx];
     const result = minSet.filter((value) => {
       let check = true;
@@ -100,7 +100,7 @@ class Set {
       }
       return check;
     });
-    console.log("result: ", result);
+    //console.log("result: ", result);
     if (result.length === 0) {
       return Response.emptyArray();
     }

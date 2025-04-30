@@ -5,13 +5,13 @@ import Response from "../src/Response.mjs";
 describe("STRING", () => {
   it("should return OK on SET", () => {
     const result = ledis.execute("SET name bao");
-    expect(result).toBe(Response.string("OK"));
+    expect(result).toBe(Response.ok());
   });
 
   it("should overwrite value if key already exists", () => {
     ledis.execute("SET name bao");
     const result = ledis.execute("SET name john");
-    expect(result).toBe(Response.string("OK"));
+    expect(result).toBe(Response.ok());
 
     const getResult = ledis.execute("GET name");
     expect(getResult).toBe(Response.string("john"));
@@ -30,7 +30,7 @@ describe("STRING", () => {
 
   it("should handle SET with numeric strings", () => {
     const result = ledis.execute("SET count 12345");
-    expect(result).toBe(Response.string("OK"));
+    expect(result).toBe(Response.ok());
 
     const getResult = ledis.execute("GET count");
     expect(getResult).toBe(Response.string("12345"));

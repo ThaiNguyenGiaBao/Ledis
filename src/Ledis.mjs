@@ -3,7 +3,6 @@ import Set from "./Type/Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 import Entry from "./Entry.mjs";
-
 import { asyncHandler } from "./utils.mjs";
 
 class Ledis {
@@ -49,22 +48,22 @@ class Ledis {
     const command = parseCmd[0].toLowerCase();
     if (this.commands.has(command)) {
       const func = this.commands.get(command);
-      console.log(func);
-      console.log("parseCmd: ", parseCmd);
+      //console.log(func);
+      //console.log("parseCmd: ", parseCmd);
       let result = null;
       if (parseCmd.length === 1) {
         result = func();
       } else {
         result = func(...parseCmd.slice(1));
       }
-      console.log(result);
+      //console.log(result);
       return result;
     }
     return Response.error(`command not found for '${command}'`);
   }
 
   setEntry(key, entry) {
-    console.log("setEntry:: ", key, entry);
+    //console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
     if (existingEntry && existingEntry.isExpired()) {
       this.removeEntry(key);
@@ -85,7 +84,7 @@ class Ledis {
 
   getEntry(key, type = undefined) {
     const entry = this.data.get(key);
-    console.log("getEntry: ", key, entry);
+    //console.log("getEntry: ", key, entry);
     if (entry === undefined) {
       return undefined;
     }
@@ -161,6 +160,17 @@ class Ledis {
 
     return this.clone.timestamp;
   }
+  garbageCollector() {
+    setInterval(() => {
+      console.log("Garbage collector running...");
+      for (const [key, entry] of this.data.entries()) {
+        if (entry.isExpired()) {
+          console.log("Removing expired entry: ", key, entry);
+          this.removeEntry(key);
+        }
+      }
+    }, 5000);
+  }
 }
 
 const ledis = new Ledis();
@@ -177,6 +187,8 @@ ledis.registerCommand("ttl", asyncHandler(Key.ttl));
 ledis.registerCommand("save", asyncHandler(ledis.save));
 ledis.registerCommand("restore", asyncHandler(ledis.restore));
 ledis.registerCommand("flushall", asyncHandler(ledis.clear));
+
+ledis.garbageCollector();
 
 export default Ledis;
 export { ledis };

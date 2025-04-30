@@ -65,3 +65,47 @@ describe("SET", () => {
     expect(result).toBe(Response.array([]));
   });
 });
+
+describe("SET performance stress test", () => {
+  const N = 50000;
+
+  it(`should add ${N} unique members `, () => {
+    // wipe any previous data
+    ledis.execute("DEL perfSet");
+    // batch in chunks of 1000 to avoid super-long command strings
+    for (let i = 0; i < N; i += 1000) {
+      const chunk = Array.from(
+        { length: Math.min(1000, N - i) },
+        (_, k) => `v${i + k}`
+      ).join(" ");
+      ledis.execute(`SADD perfSet  ${chunk}`);
+    }
+  }, 30_000);
+
+  it(`SMEMBERS on ${N} items returns all `, () => {
+    ledis.execute("SMEMBERS perfSet");
+  }, 30_000);
+
+  it(`should intersect two large sets`, () => {
+    // prepare a second set that overlaps by half
+    ledis.execute("DEL perfSet2");
+    for (let i = 0; i < N; i += 1000) {
+      const chunk = Array.from(
+        { length: Math.min(1000, N - i + 1) },
+        (_, k) => `v${Math.floor((i + k) / 2)}`
+      ).join(" ");
+      ledis.execute(`SADD perfSet2 ${chunk}`);
+    }
+
+    ledis.execute("DEL perfSet3");
+    for (let i = 0; i < N; i += 1000) {
+      const chunk = Array.from(
+        { length: Math.min(1000, N - i + 2) },
+        (_, k) => `v${Math.floor((i + k) / 2)}`
+      ).join(" ");
+      ledis.execute(`SADD perfSet3 ${chunk}`);
+    }
+
+    ledis.execute("SINTER perfSet perfSet2 perfSet3");
+  }, 30_000);
+});
