@@ -8,28 +8,19 @@ class Key {
     }
     return Response.array(keys);
   }
-  static del(key, check) {
+  static del(key) {
     console.log("del key: ", key);
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
-    if (key === undefined) {
-      return Response.error("Key is required");
-    }
+    
     if (ledis.getEntry(key) === undefined) {
       return Response.integer(0);
     }
     ledis.removeEntry(key);
     return Response.integer(1);
   }
-  static expire(key, seconds, check) {
+  static expire(key, seconds) {
     console.log("expire key: ", key, " seconds: ", seconds);
-    if (key === undefined || seconds === undefined) {
-      return Response.error("Key and seconds are required");
-    }
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
+  
+
     if (isNaN(seconds)) {
       return Response.error("Seconds must be a number");
     }
@@ -40,15 +31,11 @@ class Key {
     entry.setExpireAt(Date.now() + seconds * 1000);
     return Response.integer(seconds);
   }
-  static ttl(key, check) {
+  static ttl(key) {
     console.log("ttl key: ", key);
-    if (key === undefined) {
-      return Response.error("Key is required");
-    }
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
+    
     const entry = ledis.getEntry(key);
+  
     if (entry === undefined) {
       return Response.integer(-2);
     }

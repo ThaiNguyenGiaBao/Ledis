@@ -1,24 +1,19 @@
-// 1. Our “decorator” factory: takes an original function, returns a wrapped one
-function logDecorator(fn) {
-    return function(...args) {
-      console.log(`→ Calling ${fn.name} with`, args);
-      const result = fn.apply(this, args);
-      console.log(`← ${fn.name} returned`, result);
+import Response from "./Response.mjs";
+
+const asyncHandler =
+  (fn, exact = true) =>
+  (...args) => {
+    if (exact && args.length != fn.length) {
+      return Response.error("Invalid number of arguments");
+    }
+
+    try {
+      const result = fn(...args);
       return result;
-    };
-  }
-  
-  // 2. A simple function we want to decorate
-  function add(x, y) {
-    return x + y;
-  }
-  
-  // 3. Create a decorated version
-  const addWithLogging = logDecorator(add);
-  
-  // 4. Call it
-  addWithLogging(2, 3);
-  // Console:
-  // → Calling add with [2, 3]
-  // ← add returned 5
-  
+    } catch (error) {
+      console.error("Error in async handler:", error);
+      return Response.error(error.message);
+    }
+  };
+
+export { asyncHandler };

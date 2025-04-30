@@ -3,33 +3,21 @@ import { ledis } from "../Ledis.mjs";
 import Response from "../Response.mjs";
 
 class String {
-  static set(key, value, check) {
+  static set(key, value) {
     console.log("set key: ", key, " value: ", value);
-    if (key === undefined || value === undefined) {
-      return Response.error("Key and value are required");
-    }
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
+
     const entry = new Entry(value, null, "string");
     console.log("entry: ", entry);
-    try {
-      ledis.setEntry(key, entry);
-    } catch (error) {
-      return Response.error(error.message);
-    }
+
+    ledis.setEntry(key, entry);
+
     return Response.string("OK");
   }
-  static get(key, check) {
-    if (key === undefined) {
-      return Response.error("Key is required");
-    }
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
-    //console.log("get key: ", key);
-    const entry = ledis.getEntry(key);
+  static get(key) {
+    console.log("get key: ", key);
+    const entry = ledis.getEntry(key, "string");
     console.log("entry: ", entry);
+
     if (entry) {
       return Response.string(entry.value);
     }

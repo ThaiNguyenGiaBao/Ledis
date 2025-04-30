@@ -6,10 +6,10 @@ import Response from "../Response.mjs";
 class Set {
   static sadd(key, ...valueList) {
     console.log("sadd key: ", key, " valueList: ", valueList);
-    if (key === undefined || valueList.length === 0) {
-      return Response.error("Key and value are required");
-    }
-    if (ledis.getEntry(key) === undefined) {
+
+    const entry = ledis.getEntry(key, "set");
+
+    if (entry === undefined) {
       // remove all duplicates from the set
       let list = [];
       for (const value of valueList) {
@@ -19,17 +19,13 @@ class Set {
       }
 
       const entry = new Entry(list, null, "set");
-      try {
-        ledis.setEntry(key, entry);
-      } catch (error) {
-        return Response.error(error.message);
-      }
+
+      ledis.setEntry(key, entry);
+
       return Response.integer(list.length);
     } else {
-      const existingEntry = ledis.getEntry(key);
-      if (existingEntry.type !== "set") {
-        return Response.error(`Type mismatch for key '${key}'`);
-      }
+      const existingEntry = ledis.getEntry(key, "set");
+
       let count = 0;
       for (const value of valueList) {
         if (!existingEntry.value.includes(value)) {
@@ -43,14 +39,9 @@ class Set {
     }
   }
 
-  static smembers(key, check) {
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
-    if (key === undefined) {
-      return Response.error("Key is required");
-    }
-    const entry = ledis.getEntry(key);
+  static smembers(key) {
+    const entry = ledis.getEntry(key, "set");
+
     if (entry === undefined) {
       return Response.emptyArray();
     }
@@ -59,10 +50,8 @@ class Set {
 
   static srem(key, ...valueList) {
     console.log("srem key: ", key, " valueList: ", valueList);
-    if (key === undefined || valueList.length === 0) {
-      return Response.error("Key and value are required");
-    }
-    const existingEntry = ledis.getEntry(key);
+
+    const existingEntry = ledis.getEntry(key, "set");
     if (existingEntry === undefined) {
       return Response.emptyArray();
     }
@@ -82,16 +71,13 @@ class Set {
   }
 
   static sinter(...listKey) {
-    if (listKey.length === 0) {
-      return Response.error("Key is required");
-    }
     console.log("sinter listKey: ", listKey);
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
 
     const valueList = [];
     for (const [index, key] of listKey.entries()) {
-      const entry = ledis.getEntry(key);
+      const entry = ledis.getEntry(key, "set");
       if (entry === undefined) {
         return Response.emptyArray();
       }

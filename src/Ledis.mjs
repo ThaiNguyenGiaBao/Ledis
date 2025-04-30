@@ -3,6 +3,9 @@ import Set from "./Type/Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 import Entry from "./Entry.mjs";
+
+import { asyncHandler } from "./utils.mjs";
+
 class Ledis {
   constructor() {
     this.commands = new Map();
@@ -46,8 +49,7 @@ class Ledis {
     }
 
     existingEntry = this.data.get(key);
-    console.log("existingEntry: ", existingEntry);
-    console.log("entry: ", entry);
+
     if (
       existingEntry &&
       entry.type != "string" &&
@@ -59,12 +61,18 @@ class Ledis {
     this.data.set(key, entry);
   }
 
-  getEntry(key, type = 'string') {
+  getEntry(key, type = undefined) {
     const entry = this.data.get(key);
     console.log("getEntry: ", key, entry);
-    if (entry && entry.isExpired()) {
+    if (entry === undefined) {
+      return undefined;
+    }
+    if (entry.isExpired()) {
       this.removeEntry(key);
       return undefined;
+    }
+    if (type != undefined && entry.type != type) {
+      throw new Error(`Type mismatch for key '${key}'`);
     }
     return entry;
   }
@@ -125,18 +133,18 @@ class Ledis {
 }
 
 const ledis = new Ledis();
-ledis.registerCommand("set", String.set);
-ledis.registerCommand("get", String.get);
-ledis.registerCommand("sadd", Set.sadd);
-ledis.registerCommand("srem", Set.srem);
-ledis.registerCommand("smembers", Set.smembers);
-ledis.registerCommand("sinter", Set.sinter);
-ledis.registerCommand("keys", Key.keys);
-ledis.registerCommand("del", Key.del);
-ledis.registerCommand("expire", Key.expire);
-ledis.registerCommand("ttl", Key.ttl);
-ledis.registerCommand("save", ledis.save);
-ledis.registerCommand("restore", ledis.restore);
+ledis.registerCommand("set", asyncHandler(String.set));
+ledis.registerCommand("get", asyncHandler(String.get));
+ledis.registerCommand("sadd", asyncHandler(Set.sadd, false));
+ledis.registerCommand("srem", asyncHandler(Set.srem, false));
+ledis.registerCommand("smembers", asyncHandler(Set.smembers));
+ledis.registerCommand("sinter", asyncHandler(Set.sinter, false));
+ledis.registerCommand("keys", asyncHandler(Key.keys));
+ledis.registerCommand("del", asyncHandler(Key.del));
+ledis.registerCommand("expire", asyncHandler(Key.expire));
+ledis.registerCommand("ttl", asyncHandler(Key.ttl));
+ledis.registerCommand("save", asyncHandler(ledis.save));
+ledis.registerCommand("restore", asyncHandler(ledis.restore));
 
 export default Ledis;
 export { ledis };

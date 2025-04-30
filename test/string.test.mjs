@@ -55,6 +55,6 @@ describe("STRING", () => {
   });
   it("should return error for invalid number of args", () => {
     const result = ledis.execute("SET name");
-    expect(result).toBe(Response.error("Key and value are required"));
+    expect(result).toBe(Response.error("Invalid number of arguments"));
   });
 });
