@@ -4,7 +4,7 @@ import Response from "./Response.mjs";
 
 class String {
   static set(key, value, check) {
-    //console.log("set key: ", key, " value: ", value);
+    console.log("set key: ", key, " value: ", value);
     if (key === undefined || value === undefined) {
       return Response.error("Key and value are required");
     }

@@ -36,6 +36,7 @@ class Ledis {
     }
     return Response.error(`command not found for '${command}'`);
   }
+  
   setEntry(key, entry) {
     console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
@@ -130,5 +131,6 @@ ledis.registerCommand("expire", Key.expire);
 ledis.registerCommand("ttl", Key.ttl);
 ledis.registerCommand("save", ledis.save);
 ledis.registerCommand("restore", ledis.restore);
+
 export default Ledis;
 export { ledis };
