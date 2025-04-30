@@ -28,7 +28,7 @@ class Set {
     } else {
       const existingEntry = ledis.getEntry(key);
       if (existingEntry.type !== "set") {
-        return Response.error(`Error: Type mismatch for key '${key}'`);
+        return Response.error(`Type mismatch for key '${key}'`);
       }
       let count = 0;
       for (const value of valueList) {

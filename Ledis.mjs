@@ -46,8 +46,12 @@ class Ledis {
     existingEntry = this.data.get(key);
     console.log("existingEntry: ", existingEntry);
     console.log("entry: ", entry);
-    if (existingEntry && existingEntry.type !== entry.type) {
-      throw new Error(`Error: Type mismatch for key '${key}'`);
+    if (
+      existingEntry &&
+      entry.type != "string" &&
+      existingEntry.type !== entry.type
+    ) {
+      throw new Error(`Type mismatch for key '${key}'`);
     }
 
     this.data.set(key, entry);
