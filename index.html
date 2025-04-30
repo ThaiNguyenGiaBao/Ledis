@@ -53,7 +53,7 @@
     <div id="terminal"></div>
 
     <script type="module">
-        import { ledis } from './Ledis.mjs'
+        import { ledis } from './src/Ledis.mjs'
 
         const term = document.getElementById('terminal');
         function addPromptLine() {
@@ -82,7 +82,7 @@
             e.preventDefault();
 
             const input = e.target;
-            const cmd = input.value.trim().toLowerCase();
+            const cmd = input.value.trim();
             input.disabled = true;
             input.removeEventListener('keydown', onCommand);
 

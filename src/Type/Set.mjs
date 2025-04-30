@@ -1,7 +1,7 @@
-import Entry from "./Entry.mjs";
-import { ledis } from "./Ledis.mjs";
+import Entry from "../Entry.mjs";
+import { ledis } from "../Ledis.mjs";
 
-import Response from "./Response.mjs";
+import Response from "../Response.mjs";
 
 class Set {
   static sadd(key, ...valueList) {
@@ -88,7 +88,9 @@ class Set {
     console.log("sinter listKey: ", listKey);
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
-    const valueList = listKey.map((key, index) => {
+
+    const valueList = [];
+    for (const [index, key] of listKey.entries()) {
       const entry = ledis.getEntry(key);
       if (entry === undefined) {
         return Response.emptyArray();
@@ -97,8 +99,8 @@ class Set {
         minLen = entry.value.length;
         minIdx = index;
       }
-      return entry.value;
-    });
+      valueList.push(entry.value);
+    }
 
     console.log(valueList);
     const minSet = valueList[minIdx];

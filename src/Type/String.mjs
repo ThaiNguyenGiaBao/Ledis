@@ -1,6 +1,6 @@
-import Entry from "./Entry.mjs";
-import { ledis } from "./Ledis.mjs";
-import Response from "./Response.mjs";
+import Entry from "../Entry.mjs";
+import { ledis } from "../Ledis.mjs";
+import Response from "../Response.mjs";
 
 class String {
   static set(key, value, check) {

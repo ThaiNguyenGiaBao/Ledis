@@ -1,5 +1,5 @@
-import String from "./String.mjs";
-import Set from "./Set.mjs";
+import String from "./Type/String.mjs";
+import Set from "./Type/Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 import Entry from "./Entry.mjs";
@@ -17,10 +17,11 @@ class Ledis {
   }
 
   execute(cmd) {
+    cmd = cmd.trim();
     const parseCmd = cmd
       .match(/"([^"]*)"|(\S+)/g)
       .map((s) => s.replace(/^"(.+)"$/, "$1"));
-    const command = parseCmd[0];
+    const command = parseCmd[0].toLowerCase();
     if (this.commands.has(command)) {
       const func = this.commands.get(command);
       console.log(func);
@@ -36,7 +37,7 @@ class Ledis {
     }
     return Response.error(`command not found for '${command}'`);
   }
-  
+
   setEntry(key, entry) {
     console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
@@ -58,7 +59,7 @@ class Ledis {
     this.data.set(key, entry);
   }
 
-  getEntry(key) {
+  getEntry(key, type = 'string') {
     const entry = this.data.get(key);
     console.log("getEntry: ", key, entry);
     if (entry && entry.isExpired()) {
@@ -71,6 +72,11 @@ class Ledis {
   removeEntry(key) {
     this.data.delete(key);
   }
+
+  clear() {
+    this.data.clear();
+  }
+
   getAllKeys() {
     const response = [];
     for (const [key, entry] of this.data.entries()) {

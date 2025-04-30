@@ -15,6 +15,9 @@ class Response {
     return "OK";
   }
   static array(value) {
+    if (!Array.isArray(value) || value.length == 0) {
+      return Response.emptyArray();
+    }
     let response = "";
     value.forEach((item, index) => {
       response += index + ") " + '"' + item + '"' + "\n";
