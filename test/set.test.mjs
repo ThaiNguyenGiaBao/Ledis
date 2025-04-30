@@ -62,9 +62,9 @@ describe("SET", () => {
 
   it("should return empty array on SINTER for non-existent key", () => {
     const result = ledis.execute("SINTER set1 unknown");
-    expect(result).toBe(Response.array([]));
+    expect(result).toBe(Response.array([])) ;
   });
-});
+}); 
 
 describe("SET performance stress test", () => {
   const N = 50000;

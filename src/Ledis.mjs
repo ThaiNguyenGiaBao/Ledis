@@ -1,5 +1,5 @@
 import String from "./Type/String.mjs";
-import Set from "./Type/Set.mjs";
+import LSet from "./Type/Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 import Entry from "./Entry.mjs";
@@ -127,6 +127,9 @@ class Ledis {
 
     for (const [key, entry] of this.data.entries()) {
       const clonedEntry = JSON.parse(JSON.stringify(entry));
+      if (entry.type === "set") {
+        clonedEntry.value = [...entry.value];
+      }
       this.clone.data.set(key, clonedEntry);
     }
 
@@ -154,6 +157,9 @@ class Ledis {
 
     for (const [key, entry] of this.clone.data.entries()) {
       console.log("restore: ", key, entry);
+      if (entry.type === "set") {
+        entry.value = new Set(entry.value);
+      }
       const clonedEntry = new Entry(entry.value, entry.expireAt, entry.type);
       this.data.set(key, clonedEntry);
     }
@@ -176,10 +182,10 @@ class Ledis {
 const ledis = new Ledis();
 ledis.registerCommand("set", asyncHandler(String.set));
 ledis.registerCommand("get", asyncHandler(String.get));
-ledis.registerCommand("sadd", asyncHandler(Set.sadd, false, 2));
-ledis.registerCommand("srem", asyncHandler(Set.srem, false, 2));
-ledis.registerCommand("smembers", asyncHandler(Set.smembers));
-ledis.registerCommand("sinter", asyncHandler(Set.sinter, false, 1));
+ledis.registerCommand("sadd", asyncHandler(LSet.sadd, false, 2));
+ledis.registerCommand("srem", asyncHandler(LSet.srem, false, 2));
+ledis.registerCommand("smembers", asyncHandler(LSet.smembers));
+ledis.registerCommand("sinter", asyncHandler(LSet.sinter, false, 1));
 ledis.registerCommand("keys", asyncHandler(Key.keys));
 ledis.registerCommand("del", asyncHandler(Key.del));
 ledis.registerCommand("expire", asyncHandler(Key.expire));
