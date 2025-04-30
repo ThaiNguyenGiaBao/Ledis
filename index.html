@@ -57,6 +57,25 @@
 
 
         const term = document.getElementById('terminal');
+        const out = document.createElement('div');
+        out.textContent = `Available commands:
+    • set <key> <value> — Set the string value of a key
+    • get <key> — Get the value of a key
+    • sadd <key> <member> [<member> …] — Add one or more members to a set
+    • srem <key> <member> [<member> …] — Remove one or more members from a set
+    • smembers <key> — Get all the members in a set
+    • sinter <key> [<otherKey> …] — Intersect one or more sets
+    • keys [<pattern>] — List all keys matching a pattern (default “*”)
+    • del <key> — Delete a key
+    • expire <key> <seconds> — Set a key’s time to live (in seconds)
+    • ttl <key> — Get the remaining time to live for a key
+    • save — Persist the dataset to disk
+    • restore — Load the dataset from disk
+    • flushall — Remove all keys
+    • help — Show this help message
+    • clear — Clear all commands
+Now, type a command 'clear' to clear all commands or 'help' to see the available commands.`;
+        term.appendChild(out);
         term.addEventListener('click', () => {
             const inputs = term.querySelectorAll('input.command:not([disabled])');
             if (inputs.length) inputs[inputs.length - 1].focus();
@@ -93,6 +112,25 @@
 
             if (cmd === 'clear') {
                 term.innerHTML = '';
+            }
+            else if (cmd == 'help') {
+                const out = document.createElement('div');
+                out.textContent = `Available commands:
+    • set <key> <value> — Set the string value of a key
+    • get <key> — Get the value of a key
+    • sadd <key> <member> [<member> …] — Add one or more members to a set
+    • srem <key> <member> [<member> …] — Remove one or more members from a set
+    • smembers <key> — Get all the members in a set
+    • sinter <key> [<otherKey> …] — Intersect one or more sets
+    • keys [<pattern>] — List all keys matching a pattern (default “*”)
+    • del <key> — Delete a key
+    • expire <key> <seconds> — Set a key’s time to live (in seconds)
+    • ttl <key> — Get the remaining time to live for a key
+    • save — Persist the dataset to disk
+    • restore — Load the dataset from disk
+    • flushall — Remove all keys
+    • help — Show this help message`;
+                term.appendChild(out);
             }
             else if (cmd != '') {
                 const result = ledis.execute(cmd);
