@@ -14,10 +14,31 @@ class Ledis {
     this.save = this.save.bind(this);
     this.restore = this.restore.bind(this);
     this.clear = this.clear.bind(this);
+    this.loadData();
   }
 
   registerCommand(command, func) {
     this.commands.set(command, func);
+  }
+
+  loadData() {
+    console.log("loadData:");
+    if (
+      typeof window !== "undefined" &&
+      typeof window.localStorage !== "undefined"
+    ) {
+      const serialized = localStorage.getItem("snapshot");
+      if (serialized) {
+        const { timestamp, data } = JSON.parse(serialized);
+        console.log("loaded data: ", data);
+        this.clone.timestamp = timestamp;
+        this.clone.data = new Map();
+        for (const [key, entry] of data) {
+          const clonedEntry = JSON.parse(JSON.stringify(entry));
+          this.clone.data.set(key, clonedEntry);
+        }
+      }
+    }
   }
 
   execute(cmd) {
@@ -109,6 +130,19 @@ class Ledis {
       const clonedEntry = JSON.parse(JSON.stringify(entry));
       this.clone.data.set(key, clonedEntry);
     }
+
+    if (
+      typeof window !== "undefined" &&
+      typeof window.localStorage !== "undefined"
+    ) {
+      const serialized = JSON.stringify({
+        timestamp: this.clone.timestamp,
+        data: Array.from(this.clone.data.entries()),
+      });
+      localStorage.setItem("snapshot", serialized);
+      console.log("Saved to localStorage:", serialized);
+    }
+
     console.log("clone: ", this.clone);
     return this.clone.timestamp;
   }
