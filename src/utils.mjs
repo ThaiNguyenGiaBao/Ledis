@@ -1,9 +1,12 @@
 import Response from "./Response.mjs";
 
 const asyncHandler =
-  (fn, exact = true) =>
+  (fn, exact = true, minArgs = 1) =>
   (...args) => {
     if (exact && args.length != fn.length) {
+      return Response.error("Invalid number of arguments");
+    }
+    if (!exact && args.length < minArgs) {
       return Response.error("Invalid number of arguments");
     }
 

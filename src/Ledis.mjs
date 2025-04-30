@@ -10,9 +10,10 @@ class Ledis {
   constructor() {
     this.commands = new Map();
     this.data = new Map();
-    this.clone = { data: null, timpestamp: null };
+    this.clone = { data: null, timestamp: null };
     this.save = this.save.bind(this);
     this.restore = this.restore.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   registerCommand(command, func) {
@@ -83,6 +84,7 @@ class Ledis {
 
   clear() {
     this.data.clear();
+    return Response.ok();
   }
 
   getAllKeys() {
@@ -97,28 +99,22 @@ class Ledis {
     return response;
   }
 
-  save(check) {
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
+  save() {
     // Deep clone the data map
-
     console.log("save: ", this.data);
     this.clone.data = new Map();
-    this.clone.timpestamp = Date.now();
+    this.clone.timestamp = Date.now();
+
     for (const [key, entry] of this.data.entries()) {
       const clonedEntry = JSON.parse(JSON.stringify(entry));
       this.clone.data.set(key, clonedEntry);
     }
     console.log("clone: ", this.clone);
-    return this.clone.timpestamp;
+    return this.clone.timestamp;
   }
-  restore(check) {
-    if (check !== undefined) {
-      return Response.error("Invalid number of arguments");
-    }
+  restore() {
     if (this.clone.data === null) {
-      return Response.error("No data to restore");
+      return Response.error("No snapshot available");
     }
 
     this.data.clear();
@@ -128,23 +124,25 @@ class Ledis {
       const clonedEntry = new Entry(entry.value, entry.expireAt, entry.type);
       this.data.set(key, clonedEntry);
     }
-    return this.clone.timpestamp;
+
+    return this.clone.timestamp;
   }
 }
 
 const ledis = new Ledis();
 ledis.registerCommand("set", asyncHandler(String.set));
 ledis.registerCommand("get", asyncHandler(String.get));
-ledis.registerCommand("sadd", asyncHandler(Set.sadd, false));
-ledis.registerCommand("srem", asyncHandler(Set.srem, false));
+ledis.registerCommand("sadd", asyncHandler(Set.sadd, false, 2));
+ledis.registerCommand("srem", asyncHandler(Set.srem, false, 2));
 ledis.registerCommand("smembers", asyncHandler(Set.smembers));
-ledis.registerCommand("sinter", asyncHandler(Set.sinter, false));
+ledis.registerCommand("sinter", asyncHandler(Set.sinter, false, 1));
 ledis.registerCommand("keys", asyncHandler(Key.keys));
 ledis.registerCommand("del", asyncHandler(Key.del));
 ledis.registerCommand("expire", asyncHandler(Key.expire));
 ledis.registerCommand("ttl", asyncHandler(Key.ttl));
 ledis.registerCommand("save", asyncHandler(ledis.save));
 ledis.registerCommand("restore", asyncHandler(ledis.restore));
+ledis.registerCommand("flushall", asyncHandler(ledis.clear));
 
 export default Ledis;
 export { ledis };
