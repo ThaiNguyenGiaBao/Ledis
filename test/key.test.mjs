@@ -13,6 +13,7 @@ describe("DATA EXPIRATION", () => {
     expect(expireResult).toBe(Response.integer(2));
 
     const ttl1 = ledis.execute("TTL mykey");
+    await new Promise((r) => setTimeout(r, 100));
     expect(ttl1).toBe(Response.integer(1));
 
     const getBefore = ledis.execute("GET mykey");
