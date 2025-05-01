@@ -1,5 +1,5 @@
 import String from "./Type/String.mjs";
-import Set from "./Type/Set.mjs";
+import LSet from "./Type/Set.mjs";
 import Key from "./Key.mjs";
 import Response from "./Response.mjs";
 import Entry from "./Entry.mjs";
@@ -127,6 +127,9 @@ class Ledis {
 
     for (const [key, entry] of this.data.entries()) {
       const clonedEntry = JSON.parse(JSON.stringify(entry));
+      if (entry.type === "set") {
+        clonedEntry.value = [...entry.value];
+      }
       this.clone.data.set(key, clonedEntry);
     }
 
@@ -154,6 +157,9 @@ class Ledis {
 
     for (const [key, entry] of this.clone.data.entries()) {
       console.log("restore: ", key, entry);
+      if (entry.type === "set") {
+        entry.value = new Set(entry.value);
+      }
       const clonedEntry = new Entry(entry.value, entry.expireAt, entry.type);
       this.data.set(key, clonedEntry);
     }
@@ -171,15 +177,32 @@ class Ledis {
       }
     }, 5000);
   }
+  // getHelpLines() {
+  //   return `Available commands:
+  // • set <key> <value> — Set the string value of a key
+  // • get <key> — Get the value of a key
+  // • sadd <key> <member> [<member> …] — Add one or more members to a set
+  // • srem <key> <member> [<member> …] — Remove one or more members from a set
+  // • smembers <key> — Get all the members in a set
+  // • sinter <key> [<otherKey> …] — Intersect one or more sets
+  // • keys [<pattern>] — List all keys matching a pattern (default “*”)
+  // • del <key> — Delete a key
+  // • expire <key> <seconds> — Set a key’s time to live (in seconds)
+  // • ttl <key> — Get the remaining time to live for a key
+  // • save — Persist the dataset
+  // • restore — Restore the dataset
+  // • flushall — Remove all keys
+  // • help — Show this help message`;
+  // }
 }
 
 const ledis = new Ledis();
 ledis.registerCommand("set", asyncHandler(String.set));
 ledis.registerCommand("get", asyncHandler(String.get));
-ledis.registerCommand("sadd", asyncHandler(Set.sadd, false, 2));
-ledis.registerCommand("srem", asyncHandler(Set.srem, false, 2));
-ledis.registerCommand("smembers", asyncHandler(Set.smembers));
-ledis.registerCommand("sinter", asyncHandler(Set.sinter, false, 1));
+ledis.registerCommand("sadd", asyncHandler(LSet.sadd, false, 2));
+ledis.registerCommand("srem", asyncHandler(LSet.srem, false, 2));
+ledis.registerCommand("smembers", asyncHandler(LSet.smembers));
+ledis.registerCommand("sinter", asyncHandler(LSet.sinter, false, 1));
 ledis.registerCommand("keys", asyncHandler(Key.keys));
 ledis.registerCommand("del", asyncHandler(Key.del));
 ledis.registerCommand("expire", asyncHandler(Key.expire));
@@ -187,6 +210,13 @@ ledis.registerCommand("ttl", asyncHandler(Key.ttl));
 ledis.registerCommand("save", asyncHandler(ledis.save));
 ledis.registerCommand("restore", asyncHandler(ledis.restore));
 ledis.registerCommand("flushall", asyncHandler(ledis.clear));
+// ledis.registerCommand(
+//   "help",
+//   () => ledis.getHelpLines(),
+//   false,
+//   0,
+//   "Show this help message"
+// );
 
 ledis.garbageCollector();
 

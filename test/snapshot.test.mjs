@@ -32,18 +32,19 @@ describe("SNAPSHOT", () => {
   it("should snapshot and restore multiple keys and types", () => {
     // set up strings
     ledis.execute("SET x 100");
+
     ledis.execute("SET y 200");
     // set up a set
     ledis.execute("SADD myset one two");
 
-    ledis.execute("SAVE");
+    ledis.execute("SAVE"); 
 
     // change all
     ledis.execute("SET x 111");
     ledis.execute("DEL y");
     ledis.execute("SREM myset two");
 
-    // verify changes applied
+    // verify changes  applied
     expect(ledis.execute("GET x")).toBe(Response.string("111"));
     expect(ledis.execute("GET y")).toBe(Response.nil());
     expect(ledis.execute("SMEMBERS myset")).toBe(Response.array(["one"]));

@@ -3,36 +3,32 @@ import { ledis } from "../Ledis.mjs";
 
 import Response from "../Response.mjs";
 
-class Set {
+class LSet {
   static sadd(key, ...valueList) {
     //console.log("sadd key: ", key, " valueList: ", valueList);
 
     const entry = ledis.getEntry(key, "set");
 
     if (entry === undefined) {
-      // remove all duplicates from the set 
-      let list = [];
-      for (const value of valueList) {
-        if (!list.includes(value)) {
-          list.push(value);
-        }
-      }
+      // remove all duplicates from the set
+      const set = new Set(valueList);
 
-      const entry = new Entry(list, null, "set");
+      const entry = new Entry(set, null, "set");
 
       ledis.setEntry(key, entry);
 
-      return Response.integer(list.length);
+      return Response.integer(set.size);
     } else {
       const existingEntry = ledis.getEntry(key, "set");
+      const set = existingEntry.value;
+      const beforeSize = existingEntry.value.size;
 
-      let count = 0;
-      for (const value of valueList) {
-        if (!existingEntry.value.includes(value)) {
-          existingEntry.value.push(value);
-          count++;
-        }
-      }
+      valueList.forEach((value) => {
+        set.add(value);
+      });
+      const afterSize = existingEntry.value.size;
+      const count = afterSize - beforeSize;
+
       ledis.setEntry(key, existingEntry);
 
       return Response.integer(count);
@@ -45,7 +41,7 @@ class Set {
     if (entry === undefined) {
       return Response.emptyArray();
     }
-    return Response.array(entry.value);
+    return Response.array([...entry.value]);
   }
 
   static srem(key, ...valueList) {
@@ -56,22 +52,22 @@ class Set {
       return Response.emptyArray();
     }
 
-    let count = 0;
-    for (const value of valueList) {
-      const index = existingEntry.value.indexOf(value);
-      if (index !== -1) {
-        existingEntry.value.splice(index, 1);
-        count++;
-      }
-    }
-    if (existingEntry.value.length === 0) {
-      ledis.removeEntry(key);
-    }
-    return Response.integer(count);
+    const sizeBefore = existingEntry.value.size;
+    const set = existingEntry.value;
+
+    valueList.forEach((value) => {
+      set.delete(value);
+    });
+    const sizeAfter = existingEntry.value.size;
+
+    return Response.integer(sizeBefore - sizeAfter);
   }
 
   static sinter(...listKey) {
     //console.log("sinter listKey: ", listKey);
+    if (listKey.length === 0) {
+      return Response.emptyArray();
+    }
     let minIdx = 0;
     let minLen = Number.MAX_VALUE;
 
@@ -81,8 +77,8 @@ class Set {
       if (entry === undefined) {
         return Response.emptyArray();
       }
-      if (entry.value.length < minLen) {
-        minLen = entry.value.length;
+      if (entry.value.size < minLen) {
+        minLen = entry.value.size;
         minIdx = index;
       }
       valueList.push(entry.value);
@@ -90,10 +86,11 @@ class Set {
 
     //console.log(valueList);
     const minSet = valueList[minIdx];
-    const result = minSet.filter((value) => {
+    const result = [...minSet].filter((value) => {
       let check = true;
       for (const set of valueList) {
-        if (!set.includes(value)) {
+        if (!set.has(value)) {
+          // Changed from set.includes(value) to set.has(value)
           check = false;
           break;
         }
@@ -108,4 +105,4 @@ class Set {
   }
 }
 
-export default Set;
+export default LSet;

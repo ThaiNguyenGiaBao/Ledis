@@ -20,7 +20,7 @@ class Response {
     }
     let response = "";
     value.forEach((item, index) => {
-      response += index + ") " + '"' + item + '"' + "\n";
+      response += index + 1 + ") " + '"' + item + '"' + "\n";
     });
     return response;
   }
