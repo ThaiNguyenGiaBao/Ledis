@@ -67,7 +67,7 @@ describe("SET", () => {
 });
 
 describe("SET performance stress test", () => {
-  const N = 50000;
+  const N = 100000;
 
   it(`should add ${N} unique members `, () => {
     // wipe any previous data
@@ -86,16 +86,16 @@ describe("SET performance stress test", () => {
     ledis.execute("SMEMBERS perfSet");
   }, 30_000);
 
-  it(`should intersect two large sets`, () => {
+  it(`should intersect three large sets (${N / 10} items)`, () => {
     // prepare a second set that overlaps by half
     ledis.execute("DEL perfSet2");
-    for (let i = 0; i < N; i += 1000) {
+    for (let i = 0; i < N; i += 100) {
       const chunk = Array.from(
         { length: Math.min(1000, N - i + 1) },
         (_, k) => `v${Math.floor((i + k) / 2)}`
       ).join(" ");
       ledis.execute(`SADD perfSet2 ${chunk}`);
-    }
+    } 
 
     ledis.execute("DEL perfSet3");
     for (let i = 0; i < N; i += 1000) {
