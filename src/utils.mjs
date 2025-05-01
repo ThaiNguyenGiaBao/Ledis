@@ -14,7 +14,7 @@ const asyncHandler =
       const result = fn(...args);
       return result;
     } catch (error) {
-      console.error("Error in async handler:", error);
+      //console.error("Error in async handler:", error);
       return Response.error(error.message);
     }
   };
