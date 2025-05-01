@@ -9,8 +9,8 @@ class Key {
     return Response.array(keys);
   }
   static del(key) {
-    console.log("del key: ", key);
-    
+    //console.log("del key: ", key);
+
     if (ledis.getEntry(key) === undefined) {
       return Response.integer(0);
     }
@@ -18,8 +18,7 @@ class Key {
     return Response.integer(1);
   }
   static expire(key, seconds) {
-    console.log("expire key: ", key, " seconds: ", seconds);
-  
+    //console.log("expire key: ", key, " seconds: ", seconds);
 
     if (isNaN(seconds)) {
       return Response.error("Seconds must be a number");
@@ -32,10 +31,10 @@ class Key {
     return Response.integer(seconds);
   }
   static ttl(key) {
-    console.log("ttl key: ", key);
-    
+    //console.log("ttl key: ", key);
+
     const entry = ledis.getEntry(key);
-  
+
     if (entry === undefined) {
       return Response.integer(-2);
     }

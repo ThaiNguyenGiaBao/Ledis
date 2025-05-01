@@ -5,7 +5,7 @@ import Response from "../Response.mjs";
 
 class LSet {
   static sadd(key, ...valueList) {
-    //console.log("sadd key: ", key, " valueList: ", valueList);
+    ////console.log("sadd key: ", key, " valueList: ", valueList);
 
     const entry = ledis.getEntry(key, "set");
 
@@ -45,7 +45,7 @@ class LSet {
   }
 
   static srem(key, ...valueList) {
-    //console.log("srem key: ", key, " valueList: ", valueList);
+    ////console.log("srem key: ", key, " valueList: ", valueList);
 
     const existingEntry = ledis.getEntry(key, "set");
     if (existingEntry === undefined) {
@@ -64,7 +64,7 @@ class LSet {
   }
 
   static sinter(...listKey) {
-    //console.log("sinter listKey: ", listKey);
+    ////console.log("sinter listKey: ", listKey);
     if (listKey.length === 0) {
       return Response.emptyArray();
     }
@@ -84,7 +84,7 @@ class LSet {
       valueList.push(entry.value);
     }
 
-    //console.log(valueList);
+    ////console.log(valueList);
     const minSet = valueList[minIdx];
     const result = [...minSet].filter((value) => {
       let check = true;
@@ -97,7 +97,7 @@ class LSet {
       }
       return check;
     });
-    //console.log("result: ", result);
+    ////console.log("result: ", result);
     if (result.length === 0) {
       return Response.emptyArray();
     }

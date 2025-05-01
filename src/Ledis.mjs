@@ -21,7 +21,7 @@ class Ledis {
   }
 
   loadData() {
-    console.log("loadData:");
+    //console.log("loadData:");
     if (
       typeof window !== "undefined" &&
       typeof window.localStorage !== "undefined"
@@ -29,7 +29,7 @@ class Ledis {
       const serialized = localStorage.getItem("snapshot");
       if (serialized) {
         const { timestamp, data } = JSON.parse(serialized);
-        console.log("loaded data: ", data);
+        //console.log("loaded data: ", data);
         this.clone.timestamp = timestamp;
         this.clone.data = new Map();
         for (const [key, entry] of data) {
@@ -48,22 +48,22 @@ class Ledis {
     const command = parseCmd[0].toLowerCase();
     if (this.commands.has(command)) {
       const func = this.commands.get(command);
-      //console.log(func);
-      //console.log("parseCmd: ", parseCmd);
+      ////console.log(func);
+      ////console.log("parseCmd: ", parseCmd);
       let result = null;
       if (parseCmd.length === 1) {
         result = func();
       } else {
         result = func(...parseCmd.slice(1));
       }
-      //console.log(result);
+      ////console.log(result);
       return result;
     }
     return Response.error(`command not found for '${command}'`);
   }
 
   setEntry(key, entry) {
-    //console.log("setEntry:: ", key, entry);
+    ////console.log("setEntry:: ", key, entry);
     let existingEntry = this.data.get(key);
     if (existingEntry && existingEntry.isExpired()) {
       this.removeEntry(key);
@@ -84,7 +84,7 @@ class Ledis {
 
   getEntry(key, type = undefined) {
     const entry = this.data.get(key);
-    //console.log("getEntry: ", key, entry);
+    ////console.log("getEntry: ", key, entry);
     if (entry === undefined) {
       return undefined;
     }
@@ -121,7 +121,7 @@ class Ledis {
 
   save() {
     // Deep clone the data map
-    console.log("save: ", this.data);
+    //console.log("save: ", this.data);
     this.clone.data = new Map();
     this.clone.timestamp = Date.now();
 
@@ -142,10 +142,10 @@ class Ledis {
         data: Array.from(this.clone.data.entries()),
       });
       localStorage.setItem("snapshot", serialized);
-      console.log("Saved to localStorage:", serialized);
+      //console.log("Saved to localStorage:", serialized);
     }
 
-    console.log("clone: ", this.clone);
+    //console.log("clone: ", this.clone);
     return this.clone.timestamp;
   }
   restore() {
@@ -156,7 +156,7 @@ class Ledis {
     this.data.clear();
 
     for (const [key, entry] of this.clone.data.entries()) {
-      console.log("restore: ", key, entry);
+      //console.log("restore: ", key, entry);
       if (entry.type === "set") {
         entry.value = new Set(entry.value);
       }
@@ -168,10 +168,10 @@ class Ledis {
   }
   garbageCollector() {
     setInterval(() => {
-      console.log("Garbage collector running...");
+      //console.log("Garbage collector running...");
       for (const [key, entry] of this.data.entries()) {
         if (entry.isExpired()) {
-          console.log("Removing expired entry: ", key, entry);
+          //console.log("Removing expired entry: ", key, entry);
           this.removeEntry(key);
         }
       }
